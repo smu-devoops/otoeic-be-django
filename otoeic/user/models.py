@@ -23,5 +23,6 @@ class User(AbstractUser):
     # Django AbstractUser에서 사용하지 않을 기본 필드들 값 설정
     first_name = None
     last_name = None
+    email = None
     is_staff = False
     is_active = True
