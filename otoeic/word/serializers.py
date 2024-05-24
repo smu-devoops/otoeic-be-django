@@ -20,5 +20,4 @@ class WordSerializer(serializers.ModelSerializer):
             'id': {'read_only': True},
             'date_created': {'read_only': True},
             'date_modified': {'read_only': True},
-            'user_created': {'read_only': True},
         }
