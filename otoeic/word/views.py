@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
 
-from word.models import WordDAO
-from word.serializers import WordSerializer
+from .models import WordDAO
+from .serializers import WordSerializer
 
 
 class WordListRestAPI(generics.ListCreateAPIView):

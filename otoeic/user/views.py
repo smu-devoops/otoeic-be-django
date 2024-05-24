@@ -1,7 +1,7 @@
 from rest_framework import generics
 
-from user.models import UserDAO
-from user.serializers import UserSerializer
+from .models import UserDAO
+from .serializers import UserSerializer
 
 
 class UserRestAPI(generics.ListCreateAPIView):

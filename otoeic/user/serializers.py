@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from user.models import UserDAO
+from .models import UserDAO
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from word.models import WordDAO
+from .models import WordDAO
 
 
 class WordSerializer(serializers.ModelSerializer):
