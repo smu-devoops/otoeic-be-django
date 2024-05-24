@@ -17,6 +17,7 @@ class UserDAO(AbstractUser):
     username = models.TextField(unique=True, null=False, blank=False)
     password = models.TextField(unique=True, null=False, blank=False)
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
+    streak = models.IntegerField(default=0)
     streak_freeze_amount = models.IntegerField(default=0)
     is_streak_freeze_activated = models.BooleanField(default=False)
     point = models.IntegerField(default=0)
