@@ -12,7 +12,7 @@ class Level(models.IntegerChoices):
 
 
 class UserDAO(AbstractUser):
-    id = models.IntegerField(primary_key=True, auto_created=True)
+    id = models.BigAutoField(primary_key=True, auto_created=True)
     email = models.EmailField(null=True, default=None) # 사용 안 함.
     username = models.TextField(unique=True, null=False, blank=False)
     password = models.TextField(unique=True, null=False, blank=False)

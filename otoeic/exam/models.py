@@ -8,7 +8,7 @@ from word.models import WordDAO
 
 
 class ExamDAO(models.Model):
-    id = models.IntegerField(primary_key=True, auto_created=True)
+    id = models.BigAutoField(primary_key=True, auto_created=True)
     user = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
     level = models.IntegerField(choices=Level.choices)
     amount = models.IntegerField(validators=[MinValueValidator(10), MaxValueValidator(40)])

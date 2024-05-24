@@ -19,7 +19,7 @@ class WordType(models.TextChoices):
 
 
 class WordDAO(models.Model):
-    id = models.IntegerField(primary_key=True, auto_created=True)
+    id = models.BigAutoField(primary_key=True, auto_created=True)
     english = models.TextField(unique=True, null=False, blank=False)
     korean = models.TextField(null=False, blank=False)
     type = models.CharField(max_length=5, choices=WordType.choices)
