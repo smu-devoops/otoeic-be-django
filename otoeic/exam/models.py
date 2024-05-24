@@ -1,4 +1,7 @@
+from random import shuffle
+
 from django.db import models
+from django.db import transaction
 from django.core.validators import MinValueValidator
 from django.core.validators import MaxValueValidator
 
@@ -16,9 +19,24 @@ class ExamDAO(models.Model):
     date_created = models.DateTimeField(auto_now=True)
     date_submitted = models.DateTimeField(null=True)
 
+    def save(self, **kwargs) -> None:
+        is_created = self.pk is None
+        with transaction.atomic():
+            super().save(**kwargs)
+            if is_created:
+                self.post_create()
+
+    def post_create(self):
+        words = WordDAO.objects.all()
+        words = list(words)
+        shuffle(words)
+        words = words[:self.amount]
+        for order, word in enumerate(words, start=1):
+            ExamQuestionDAO.objects.create(exam=self, word=word, order=order)
+
 
 class ExamQuestionDAO(models.Model):
-    exam = models.ForeignKey(ExamDAO, on_delete=models.CASCADE)
+    exam = models.ForeignKey(ExamDAO, on_delete=models.CASCADE, related_name='questions')
     word = models.ForeignKey(WordDAO, on_delete=models.PROTECT)
     order = models.IntegerField()
     submitted_answer = models.TextField(blank=True, default='')
