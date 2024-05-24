@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from word.models import Word
+from word.models import WordDAO
 
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Word
+        model = WordDAO
         fields = [
             'id',
             'english',

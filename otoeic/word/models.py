@@ -1,7 +1,7 @@
 from django.db import models
 
 from user.models import Level
-from user.models import User
+from user.models import UserDAO
 
 # Create your models here.
 
@@ -18,7 +18,7 @@ class WordType(models.TextChoices):
     IDIOM = 'idm', 'idiom (숙어)'
 
 
-class Word(models.Model):
+class WordDAO(models.Model):
     id = models.IntegerField(primary_key=True, auto_created=True)
     english = models.TextField(unique=True, null=False, blank=False)
     korean = models.TextField(null=False, blank=False)
@@ -26,4 +26,4 @@ class Word(models.Model):
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
     date_modified = models.DateTimeField(auto_now=True)
     date_created = models.DateTimeField(auto_now_add=True)
-    user_created = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_created = models.ForeignKey(UserDAO, on_delete=models.CASCADE)

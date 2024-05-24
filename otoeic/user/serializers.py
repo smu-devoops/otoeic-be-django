@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from user.models import User
+from user.models import UserDAO
 
 
 class UserSerializer(serializers.ModelSerializer):
     streak = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = UserDAO
         fields = ['id',
                   'password',
                   'username',
@@ -23,6 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
             'profile_image': {'required': False, 'write_only': True},
         }
 
-    def get_streak(self, obj: User):
+    def get_streak(self, obj: UserDAO):
         # TODO
         return 0
