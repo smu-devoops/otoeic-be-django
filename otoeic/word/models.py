@@ -23,7 +23,7 @@ class WordDAO(models.Model):
     english = models.TextField(unique=True, null=False, blank=False)
     korean = models.TextField(null=False, blank=False)
     type = models.CharField(max_length=5, choices=WordType.choices)
-    level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
+    level = models.IntegerField(choices=Level.choices)
     date_modified = models.DateTimeField(auto_now=True)
     date_created = models.DateTimeField(auto_now_add=True)
     user_created = models.ForeignKey(UserDAO, on_delete=models.SET_DEFAULT, default=1) # default is admin's user id
