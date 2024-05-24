@@ -23,9 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
             'profile_image': {'required': False, 'write_only': True},
         }
 
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
     def get_streak(self, obj: User):
         # TODO
         return 0
