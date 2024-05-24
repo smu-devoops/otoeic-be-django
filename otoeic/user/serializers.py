@@ -4,11 +4,13 @@ from user.models import UserDAO
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_admin = serializers.SerializerMethodField()
     streak = serializers.SerializerMethodField()
 
     class Meta:
         model = UserDAO
         fields = ['id',
+                  'is_admin',
                   'password',
                   'username',
                   'level',
@@ -19,9 +21,11 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
             'email': {'write_only': True},
-            # 'password': {'write_only': True},
-            'profile_image': {'required': False, 'write_only': True},
+            'is_admin': {'read_only': True},
         }
+
+    def get_is_admin(self, obj: UserDAO) -> bool:
+        return obj.is_superuser
 
     def get_streak(self, obj: UserDAO):
         # TODO
