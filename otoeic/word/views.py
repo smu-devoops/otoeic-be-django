@@ -1,15 +1,18 @@
 from rest_framework import generics
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import pagination
+from rest_framework import filters
 
 from .models import WordDAO
 from .serializers import WordSerializer
 
 
 class WordListRestAPI(generics.ListCreateAPIView):
-    queryset = WordDAO.objects
+    queryset = WordDAO.objects.all()
     serializer_class = WordSerializer
     permission_classes = []
-    pagination_class = PageNumberPagination
+    pagination_class = pagination.PageNumberPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = '__all__'
 
 
 class WordRestAPI(generics.RetrieveUpdateDestroyAPIView):
