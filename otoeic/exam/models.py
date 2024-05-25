@@ -27,7 +27,7 @@ class ExamDAO(models.Model):
                 self.post_create()
 
     def post_create(self):
-        words = WordDAO.objects.all()
+        words = WordDAO.objects.filter(level=self.level)
         words = list(words)
         shuffle(words)
         words = words[:self.amount]
