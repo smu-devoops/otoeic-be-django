@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from random import shuffle
 
 from django.db import models
@@ -10,6 +12,10 @@ from user.models import UserDAO
 from word.models import WordDAO
 
 
+DAILY_BONUS_POINT_MULTIPLIER = 3
+HOUR_OF_START_OF_THE_DAY = 6
+
+
 class ExamDAO(models.Model):
     id = models.BigAutoField(primary_key=True, auto_created=True)
     user = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
@@ -18,6 +24,8 @@ class ExamDAO(models.Model):
     point = models.IntegerField(default=0)
     date_created = models.DateTimeField(auto_now=True)
     date_submitted = models.DateTimeField(null=True)
+
+    questions: models.QuerySet[ExamQuestionDAO]
 
     def save(self, **kwargs) -> None:
         is_created = self.pk is None

@@ -13,6 +13,16 @@ class ExamQuestionSerializer(serializers.ModelSerializer):
         fields = ['word', 'order', 'submitted_answer']
 
 
+class ExamSubmitSerializer(serializers.Serializer):
+    answers = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = ExamDAO
+        fields = [
+            'answers'
+        ]
+
+
 class ExamSerializer(serializers.ModelSerializer):
     questions = ExamQuestionSerializer(many=True, read_only=True)
 
