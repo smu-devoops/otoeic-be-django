@@ -20,10 +20,10 @@ DAILY_BONUS_POINT_MULTIPLIER = 3
 
 class ExamDAO(models.Model):
     id = models.BigAutoField(primary_key=True, auto_created=True)
-    user = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
     level = models.IntegerField(choices=Level.choices)
     amount = models.IntegerField(validators=[MinValueValidator(10), MaxValueValidator(40)])
     point = models.IntegerField(default=0)
+    user_created = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now=True)
     date_submitted = models.DateTimeField(null=True)
 
