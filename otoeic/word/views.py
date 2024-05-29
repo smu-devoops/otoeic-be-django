@@ -1,25 +1,28 @@
 from django.db.models import Q
 from django.db.transaction import atomic
-from rest_framework import request
 from rest_framework import generics
-from rest_framework import pagination
 from rest_framework import permissions
-from rest_framework import filters
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import OrderingFilter
+from rest_framework.request import Request
 
 from user.models import UserDAO
 from . import models
 from . import serializers
 
 
-class WordAccessPermission(permissions.BasePermission):
-    message = 'Manipulation is not allowed.'
+class ReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
 
-    def has_permission(self, request: request.Request, view: generics.GenericAPIView):
+
+class IsWordOwner(permissions.BasePermission):
+    message = 'Not an owner of this word.'
+
+    def has_permission(self, request: Request, view: generics.GenericAPIView):
         word: models.WordDAO = view.get_object()
         return bool(
-            request.method in permissions.SAFE_METHODS or
             request.user and
-            request.user.is_staff or
             word.user_created == request.user
         )
 
@@ -27,8 +30,8 @@ class WordAccessPermission(permissions.BasePermission):
 class WordListCreateView(generics.ListCreateAPIView):
     serializer_class = serializers.WordSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = pagination.PageNumberPagination
-    filter_backends = [filters.OrderingFilter]
+    pagination_class = PageNumberPagination
+    filter_backends = [OrderingFilter]
     ordering_fields = '__all__'
 
     def get_queryset(self):
@@ -36,8 +39,7 @@ class WordListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         word: models.WordDAO
-        user: UserDAO
-        user = self.request.user
+        user: UserDAO = self.request.user
         with atomic():
             word = serializer.save()
             # 관리자가 추가하고 있는 단어이면 공용 단어로 만들기 위해 사용자를 None 으로 지정
@@ -48,25 +50,5 @@ class WordListCreateView(generics.ListCreateAPIView):
 class WordManipulateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.WordDAO.objects.all()
     serializer_class = serializers.WordSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, WordAccessPermission]
+    permission_classes = [ReadOnly|IsWordOwner]
     lookup_field = 'id'
-
-    def retrieve(self, request, *args, **kwargs):
-        self._validate_permission()
-        return super().retrieve(request, *args, **kwargs)
-
-    def perform_destroy(self, instance):
-        self._validate_permission()
-        return super().perform_destroy(instance)
-
-    def perform_update(self, serializer):
-        self._validate_permission()
-        return super().perform_update(serializer)
-
-    def _validate_permission(self):
-        word: models.WordDAO
-        word = self.get_object()
-        print(self.request.user)
-        if word.user_created == self.request.user or self.request.user.is_staff:
-            return
-        raise PermissionError
