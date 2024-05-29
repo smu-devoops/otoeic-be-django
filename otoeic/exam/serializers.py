@@ -9,7 +9,7 @@ from . import models
 from . import services
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class UnsubmittedQuestionSerializer(serializers.ModelSerializer):
     word = WordForUnsubmittedExamSerializer(read_only=True)
 
     class Meta:
@@ -26,7 +26,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class UnsubmittedExamSerializer(serializers.ModelSerializer):
     user_created = UsernameSerializer(read_only=True)
-    questions = QuestionSerializer(many=True, read_only=True)
+    questions = UnsubmittedQuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.ExamDAO

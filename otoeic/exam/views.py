@@ -9,7 +9,13 @@ from . import models
 from . import serializers
 
 
-class ExamCreateView(generics.ListCreateAPIView):
+class UnsubmittedExamCreateView(generics.ListCreateAPIView):
+    queryset = models.ExamDAO.objects.all()
+    serializer_class = serializers.UnsubmittedExamSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
     queryset = models.ExamDAO.objects.all()
     serializer_class = serializers.UnsubmittedExamSerializer
     permission_classes = [permissions.IsAuthenticated]
