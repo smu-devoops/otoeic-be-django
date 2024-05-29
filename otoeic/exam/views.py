@@ -1,19 +1,18 @@
 from http import HTTPStatus
 
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 
 from . import models
 from . import serializers
 
 
-class ExamListRestAPI(generics.ListCreateAPIView):
+class ExamCreateView(generics.ListCreateAPIView):
     queryset = models.ExamDAO.objects.all()
-    serializer_class = serializers.ExamSerializer
-    permission_classes = []
-    pagination_class = PageNumberPagination
+    serializer_class = serializers.UnsubmittedExamSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ExamRestAPI(generics.RetrieveUpdateAPIView):
