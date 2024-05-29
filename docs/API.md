@@ -234,3 +234,5 @@ PATCH /streak/freeze
     "activate": bool
 }
 ```
+* 200: 정상적으로 업데이트 됨
+* 401: 로그인이 되어있지 않음
