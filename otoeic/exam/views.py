@@ -9,6 +9,14 @@ from . import models
 from . import serializers
 
 
+class IsCreator(permissions.BasePermission):
+    def has_object_permission(self, request: Request, view, obj: models.ExamDAO):
+        return bool(
+            request.user and
+            obj.user_created == request.user
+        )
+
+
 class UnsubmittedExamCreateView(generics.ListCreateAPIView):
     queryset = models.ExamDAO.objects.all()
     serializer_class = serializers.UnsubmittedExamSerializer
@@ -18,7 +26,8 @@ class UnsubmittedExamCreateView(generics.ListCreateAPIView):
 class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
     queryset = models.ExamDAO.objects.all()
     serializer_class = serializers.UnsubmittedExamSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsCreator|permissions.IsAdminUser]
+    lookup_field = 'id'
 
 
 class ExamRestAPI(generics.RetrieveUpdateAPIView):
