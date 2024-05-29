@@ -57,7 +57,7 @@ MIDDLEWARE = [
     "otoeic.middleware.DisableCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "otoeic.middleware.LogUserMiddleware",
+    "otoeic.middleware.LoggingMiddleware",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -151,35 +151,27 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'request_user': {
-            '()': 'otoeic.log_filters.RequestUserFilter',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}\n\t{request}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "django.server": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
         },
     },
-    'formatters': {
-        'verbose': {
-            'format': '[{asctime}] {message} (user={username})',
-            'style': '{',
+    "loggers": {
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
         },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'filters': ['request_user'],
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
     },
 }

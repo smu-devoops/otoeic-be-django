@@ -1,6 +1,8 @@
 import logging
 
-from . import log_filters
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
+from django.utils.log import ServerFormatter
 
 
 class DisableCSRFMiddleware:
@@ -13,16 +15,25 @@ class DisableCSRFMiddleware:
         return response
 
 
-class LogUserMiddleware:
+class LoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def __call__(self, request):
+
+    def __call__(self, request: HttpRequest):
+        response: HttpResponse = self.get_response(request)
+        req_msg = "{method} {path} {protocol}".format(
+            method = request.method,
+            path = request.path,
+            protocol = request.environ.get('SERVER_PROTOCOL'),
+        )
+        res_msg = "{status}".format(
+            status = response.status_code
+        )
+        usr_msg = "[{user}@{host}]".format(
+            user = request.user,
+            host = request.get_host(),
+        )
         logger = logging.getLogger('django')
-        if request.user.is_authenticated:
-            # 로거에 커스텀 필터 추가
-            user_filter = log_filters.RequestUserFilter()
-            user_filter.username = request.user.username
-            logger.addFilter(user_filter)
-        response = self.get_response(request)
+        logger.log(logging.INFO, f"[Summary] \"{req_msg}\" {res_msg} {usr_msg}")
         return response
