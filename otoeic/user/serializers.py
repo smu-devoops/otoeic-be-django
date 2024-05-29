@@ -14,15 +14,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDAO
-        fields = ['id',
-                  'is_admin',
-                  'password',
-                  'username',
-                  'level',
-                  'streak',
-                  'streak_freeze_amount',
-                  'is_streak_freeze_activated',
-                  'point']
+        fields = [
+            'id',
+            'username',
+            'is_admin',
+            'level',
+            'streak',
+            'streak_freeze_amount',
+            'is_streak_freeze_activated',
+            'point'
+        ]
         extra_kwargs = {
             'id': {'read_only': True},
             'email': {'write_only': True},
