@@ -3,6 +3,11 @@ from rest_framework import serializers
 from .models import UserDAO
 
 
+class UsernamePasswordSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+
 class UserSerializer(serializers.ModelSerializer):
     is_admin = serializers.SerializerMethodField()
     streak = serializers.SerializerMethodField()
