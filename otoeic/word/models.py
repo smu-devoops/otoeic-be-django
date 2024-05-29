@@ -24,6 +24,7 @@ class WordDAO(models.Model):
     korean = models.TextField(null=False, blank=False)
     type = models.CharField(max_length=5, choices=WordType.choices)
     level = models.IntegerField(choices=Level.choices)
+    ranked = models.BooleanField(default=False)
     date_modified = models.DateTimeField(auto_now=True)
     date_created = models.DateTimeField(auto_now_add=True)
     user_created = models.ForeignKey(UserDAO, on_delete=models.SET_DEFAULT, default=1) # default is admin's user id
