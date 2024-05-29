@@ -12,7 +12,7 @@ from django.core.validators import MaxValueValidator
 from user.models import Level
 from user.models import UserDAO
 from word.models import WordDAO
-from .utils import get_date_range
+from . import utils
 
 
 DAILY_BONUS_POINT_MULTIPLIER = 3
@@ -93,7 +93,7 @@ class ExamDAO(models.Model):
     def _did_submit_on(self, date: datetime.datetime) -> bool:
         return ExamDAO.objects.filter(
             user=self.user,
-            date_submitted__range=get_date_range(date)
+            date_submitted__range=utils.get_date_range(date)
         ).exists()
 
 

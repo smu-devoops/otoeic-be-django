@@ -1,15 +1,14 @@
 from rest_framework import serializers
 
 from word.serializers import WordSerializer
-from .models import ExamDAO
-from .models import ExamQuestionDAO
+from . import models
 
 
 class ExamQuestionSerializer(serializers.ModelSerializer):
     word = WordSerializer(read_only=True)
 
     class Meta:
-        model = ExamQuestionDAO
+        model = models.ExamQuestionDAO
         fields = ['word', 'order', 'submitted_answer']
 
 
@@ -17,7 +16,7 @@ class ExamSubmitSerializer(serializers.Serializer):
     answers = serializers.ListField(child=serializers.CharField())
 
     class Meta:
-        model = ExamDAO
+        model = models.ExamDAO
         fields = [
             'answers'
         ]
@@ -27,7 +26,7 @@ class ExamSerializer(serializers.ModelSerializer):
     questions = ExamQuestionSerializer(many=True, read_only=True)
 
     class Meta:
-        model = ExamDAO
+        model = models.ExamDAO
         fields = [
             'id',
             'user',
