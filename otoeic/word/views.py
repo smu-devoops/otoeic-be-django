@@ -49,5 +49,5 @@ class WordListCreateView(generics.ListCreateAPIView):
 class WordManipulateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.WordDAO.objects.all()
     serializer_class = serializers.WordSerializer
-    permission_classes = [ReadOnly|IsWordOwner]
+    permission_classes = [ReadOnly|IsWordOwner|permissions.IsAdminUser]
     lookup_field = 'id'
