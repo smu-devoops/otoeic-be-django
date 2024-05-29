@@ -3,8 +3,6 @@ from django.db import models
 from user.models import Level
 from user.models import UserDAO
 
-# Create your models here.
-
 
 class WordType(models.TextChoices):
     NOUN = 'n', 'noun (명사)'
@@ -24,7 +22,6 @@ class WordDAO(models.Model):
     korean = models.TextField(null=False, blank=False)
     type = models.CharField(max_length=5, choices=WordType.choices)
     level = models.IntegerField(choices=Level.choices)
-    ranked = models.BooleanField(default=False)
     date_modified = models.DateTimeField(auto_now=True)
     date_created = models.DateTimeField(auto_now_add=True)
-    user_created = models.ForeignKey(UserDAO, on_delete=models.SET_DEFAULT, default=1) # default is admin's user id
+    user_created = models.ForeignKey(UserDAO, on_delete=models.CASCADE, null=True) # if Null, it means this word is shared among all users.

@@ -3,6 +3,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('word', views.WordListRestAPI.as_view()),
-    path('word/<int:id>', views.WordRestAPI.as_view()),
+    path('word', views.WordListCreateView.as_view()),
+    path('word/<int:id>', views.WordManipulateView.as_view()),
 ]
