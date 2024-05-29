@@ -37,6 +37,7 @@ class WordListCreateView(generics.ListCreateAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
+        # 자신이 생성했거나, 공용인 단어만 조회할 수 있다.
         return models.WordDAO.objects.filter(Q(user_created=self.request.user) | Q(user_created=None))
 
     def perform_create(self, serializer):
