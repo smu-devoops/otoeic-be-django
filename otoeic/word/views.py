@@ -19,11 +19,10 @@ class ReadOnly(permissions.BasePermission):
 class IsWordOwner(permissions.BasePermission):
     message = 'Not an owner of this word.'
 
-    def has_permission(self, request: Request, view: generics.GenericAPIView):
-        word: models.WordDAO = view.get_object()
+    def has_object_permission(self, request: Request, view, obj: models.WordDAO):
         return bool(
             request.user and
-            word.user_created == request.user
+            obj.user_created == request.user
         )
 
 
