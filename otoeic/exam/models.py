@@ -23,12 +23,12 @@ class ExamDAO(models.Model):
     level = models.IntegerField(choices=Level.choices)
     amount = models.IntegerField(validators=[MinValueValidator(10), MaxValueValidator(40)])
     ranked = models.BooleanField(default=False)
-    point = models.IntegerField(default=0)
     user_created = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now=True)
-    date_submitted = models.DateTimeField(null=True)
 
     questions: models.QuerySet[ExamQuestionDAO]
+    result: models.QuerySet[ExamResultDAO]
+
 
     def save(self, **kwargs) -> None:
         is_created = self.pk is None
@@ -102,4 +102,10 @@ class ExamQuestionDAO(models.Model):
     exam = models.ForeignKey(ExamDAO, on_delete=models.CASCADE, related_name='questions')
     word = models.ForeignKey(WordDAO, on_delete=models.PROTECT)
     order = models.IntegerField()
-    submitted_answer = models.TextField(blank=True, default='')
+    answer_submitted = models.CharField(max_length=200, blank=True, default='')
+
+
+class ExamResultDAO(models.Model):
+    exam = models.OneToOneField(ExamDAO, on_delete=models.CASCADE, related_name='result')
+    point = models.IntegerField()
+    date_created = models.DateTimeField(auto_now=True)
