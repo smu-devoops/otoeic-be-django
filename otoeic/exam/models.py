@@ -22,6 +22,7 @@ class ExamDAO(models.Model):
     id = models.BigAutoField(primary_key=True, auto_created=True)
     level = models.IntegerField(choices=Level.choices)
     amount = models.IntegerField(validators=[MinValueValidator(10), MaxValueValidator(40)])
+    ranked = models.BooleanField(default=False)
     point = models.IntegerField(default=0)
     user_created = models.ForeignKey(UserDAO, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now=True)
