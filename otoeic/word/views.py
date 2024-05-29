@@ -11,9 +11,12 @@ from . import models
 from . import serializers
 
 
-class ReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+class IsWordReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request: Request, view, obj: models.WordDAO):
+        return bool(
+            request.method in permissions.SAFE_METHODS and
+            obj.user_created is None
+        )
 
 
 class IsWordOwner(permissions.BasePermission):
@@ -49,5 +52,5 @@ class WordListCreateView(generics.ListCreateAPIView):
 class WordManipulateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.WordDAO.objects.all()
     serializer_class = serializers.WordSerializer
-    permission_classes = [ReadOnly|IsWordOwner|permissions.IsAdminUser]
+    permission_classes = [IsWordReadOnly|IsWordOwner|permissions.IsAdminUser]
     lookup_field = 'id'
