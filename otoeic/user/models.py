@@ -15,7 +15,7 @@ class UserDAO(AbstractUser):
     id = models.BigAutoField(primary_key=True, auto_created=True)
     email = models.EmailField(null=True, default=None) # 사용 안 함.
     username = models.TextField(unique=True, null=False, blank=False)
-    password = models.TextField(unique=True, null=False, blank=False)
+    password = models.TextField(null=False, blank=False)
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
     streak = models.IntegerField(default=0)
     streak_freeze_amount = models.IntegerField(default=0)
