@@ -5,10 +5,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Level(models.IntegerChoices):
-    LEVEL_1 = 1, '1'
-    LEVEL_2 = 2, '2'
-    LEVEL_3 = 3, '3'
-    LEVEL_4 = 4, '4'
+    LEVEL_1 = 1, 'Level 1'
+    LEVEL_2 = 2, 'Level 2'
+    LEVEL_3 = 3, 'Level 3'
+    LEVEL_4 = 4, 'Level 4'
 
 
 class UserDAO(AbstractUser):
