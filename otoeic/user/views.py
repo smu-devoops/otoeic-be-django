@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from . import models
 from . import serializers
+from . import services
 
 
 class UserListView(generics.ListAPIView):
@@ -73,3 +74,13 @@ class UserSelfView(generics.GenericAPIView):
 
     def get_object(self):
         return auth.get_user(self.request)
+
+
+class UserCalendarView(generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
+
+    def get(self, request: Request, *args, **kwargs):
+        data = services.get_calendar(user=self.get_object())
+        return Response(data, status=HTTPStatus.OK)
