@@ -29,27 +29,19 @@ class UserRegisterView(generics.CreateAPIView):
 
 class UserLoginView(generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UsernamePasswordSerializer
     permission_classes = [permissions.AllowAny]
 
-    def get_serializer(self, *args, **kwargs) -> serializers.UsernamePasswordSerializer:
-        return serializers.UsernamePasswordSerializer(*args, **kwargs)
-
-    def perform_authentication(self, request: Request):
+    def post(self, request: Request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
-
         user = auth.authenticate(request, username=username, password=password)
         if user is None:
             auth.logout(request)
             raise exceptions.AuthenticationFailed(detail=(
                 f"User authentication failed."
             ))
-
         auth.login(request, user)
-
-    def post(self, request: Request, *args, **kwargs):
-        self.perform_authentication(request)
-        user = auth.get_user(request)
         data = self.get_serializer(instance=user).data
         return Response(data=data, status=HTTPStatus.OK)
 
