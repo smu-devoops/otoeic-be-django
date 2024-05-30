@@ -38,3 +38,20 @@ class WordForUnsubmittedExamSerializer(serializers.ModelSerializer):
             'korean': {'read_only': True},
             'type': {'read_only': True},
         }
+
+
+class WordForSubmittedExamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WordDAO
+        fields = [
+            'id',
+            'english',
+            'korean',
+            'type',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'english': {'read_only': True},
+            'korean': {'read_only': True},
+            'type': {'read_only': True},
+        }
