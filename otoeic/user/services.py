@@ -6,12 +6,14 @@ from django.db.models import expressions
 from django.db.models import fields
 from django.db.models import functions
 from django.db.models import QuerySet
+from rest_framework import exceptions
 
 from exam.models import ExamDAO
 from . import models
 
 
 DATE_START_HOUR = 6
+PRICE_STREAK_FREEZE = 640
 
 
 def get_calendar(user: models.UserDAO) -> typing.Dict[datetime.date, int]:
@@ -42,7 +44,7 @@ def update_streak(user: models.UserDAO) -> None:
 
             elif _should_use_streak_freeze(user):
                 # 시험을 제출하지 않았어도 streak freeze가 활성화 되어 있으면 streak를 유지한다.
-                user.streak_freeze_amount -= 1
+                user.freeze_amount -= 1
 
             else:
                 # 시험을 제출하지 않아 streak이 끊겼다.
@@ -72,8 +74,8 @@ def _should_use_streak_freeze(user: models.UserDAO) -> bool:
     """streak freeze를 사용할 수 있는지 여부를 반환한다."""
     return bool(
         user.streak > 0 and
-        user.streak_freeze_activated and
-        user.streak_freeze_amount > 0
+        user.freeze_activated and
+        user.freeze_amount > 0
     )
 
 
@@ -104,3 +106,14 @@ def _get_calendar_queryset(user: models.UserDAO) -> QuerySet:
         count=aggregates.Count('date'),
     )
     return queryset.order_by('-date')
+
+
+def buy_streak_freeze(user: models.UserDAO) -> None:
+    """streak freeze를 구매한다."""
+    if user.point < PRICE_STREAK_FREEZE:
+        raise exceptions.ValidationError(detail=(
+            f"Not enough point to buy streak freeze."
+        ))
+    user.point -= PRICE_STREAK_FREEZE
+    user.freeze_amount += 1
+    user.save()

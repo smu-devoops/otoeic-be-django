@@ -11,14 +11,20 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'username',
             'level',
-            'streak',
-            'streak_freeze_amount',
-            'streak_freeze_activated',
             'point',
+            'freeze_amount',
+            'freeze_activated',
+            'streak',
+            'date_created',
             'is_staff',
         ]
         extra_kwargs = {
             'id': {'read_only': True},
+            'username': {'read_only': True},
+            'point': {'read_only': True},
+            'freeze_amount': {'read_only': True},
+            'streak': {'read_only': True},
+            'date_created': {'read_only': True},
             'is_staff': {'read_only': True},
         }
 

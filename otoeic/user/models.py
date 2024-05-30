@@ -18,9 +18,9 @@ class UserDAO(AbstractUser):
     password = models.CharField(max_length=200, blank=False)
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
     point = models.IntegerField(default=0)
+    freeze_amount = models.IntegerField(default=0)
+    freeze_activated = models.BooleanField(default=False)
     streak = models.IntegerField(default=0)
-    streak_freeze_amount = models.IntegerField(default=0)
-    streak_freeze_activated = models.BooleanField(default=False)
     date_streak_should_be_updated = models.DateField(auto_now=True)
     date_created = models.DateTimeField(auto_now=True)
 
@@ -28,3 +28,10 @@ class UserDAO(AbstractUser):
     first_name = None
     last_name = None
     is_active = True
+
+
+class UserCalendarDAO(models.Model):
+    user = models.ForeignKey(UserDAO, on_delete=models.CASCADE, related_name='calendar')
+    date = models.DateField(null=False)
+    count = models.IntegerField(default=0)
+    is_freezed = models.BooleanField(default=False)

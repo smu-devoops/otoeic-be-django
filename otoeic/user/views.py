@@ -73,14 +73,10 @@ class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-class UserSelfView(UserSelfMixin, generics.GenericAPIView):
+class UserSelfManageView(UserSelfMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = [IsOwn|permissions.IsAdminUser]
-
-    def get(self, request: Request, *args, **kwargs):
-        data = self.get_serializer(self.get_object()).data
-        return Response(data, status=HTTPStatus.OK)
 
 
 class UserCalendarView(generics.GenericAPIView):
@@ -104,4 +100,15 @@ class UserSelfCalendarView(UserSelfMixin, generics.GenericAPIView):
         data = {
             'calendar': services.get_calendar(self.get_object()),
         }
+        return Response(data, status=HTTPStatus.OK)
+
+
+class UserBuyFreezeView(UserSelfMixin, generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request: Request, *args, **kwargs):
+        services.buy_streak_freeze(self.get_object())
+        data = serializers.UserSerializer(instance=self.get_object()).data
         return Response(data, status=HTTPStatus.OK)
