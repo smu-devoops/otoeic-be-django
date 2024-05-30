@@ -20,8 +20,6 @@ class IsWordReadOnly(permissions.BasePermission):
 
 
 class IsWordOwner(permissions.BasePermission):
-    message = 'Not an owner of this word.'
-
     def has_object_permission(self, request: Request, view, obj: models.WordDAO):
         return bool(
             request.user and
@@ -37,8 +35,11 @@ class WordListCreateView(generics.ListCreateAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        # 자신이 생성했거나, 공용인 단어만 조회할 수 있다.
-        return models.WordDAO.objects.filter(Q(user_created=self.request.user) | Q(user_created=None))
+        queryset = models.WordDAO.objects.all()
+        if not self.request.user.is_staff:
+            # 사용자는 자신이 생성했거나, 공용인 단어만 조회할 수 있다.
+            queryset = queryset.filter(Q(user_created=self.request.user) | Q(user_created=None))
+        return queryset
 
     def perform_create(self, serializer):
         word: models.WordDAO
