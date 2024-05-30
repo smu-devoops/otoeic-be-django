@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import UserDAO
+from . import models
 
 
 class UsernamePasswordSerializer(serializers.Serializer):
@@ -10,7 +10,7 @@ class UsernamePasswordSerializer(serializers.Serializer):
 
 class UsernameSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserDAO
+        model = models.UserDAO
         fields = [
             'id',
             'username',
@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     streak = serializers.SerializerMethodField()
 
     class Meta:
-        model = UserDAO
+        model = models.UserDAO
         fields = [
             'id',
             'username',
