@@ -5,9 +5,9 @@ from rest_framework import exceptions
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework import permissions
-from rest_framework import request
-from rest_framework import response
 from rest_framework import views
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from . import models
 from . import serializers
@@ -34,7 +34,7 @@ class UserLoginView(generics.GenericAPIView):
     def get_serializer(self, *args, **kwargs) -> serializers.UsernamePasswordSerializer:
         return serializers.UsernamePasswordSerializer(*args, **kwargs)
 
-    def perform_authentication(self, request: request.Request):
+    def perform_authentication(self, request: Request):
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -47,20 +47,20 @@ class UserLoginView(generics.GenericAPIView):
 
         auth.login(request, user)
 
-    def post(self, request: request.Request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs):
         self.perform_authentication(request)
         user = auth.get_user(request)
         data = self.get_serializer(instance=user).data
-        return response.Response(data=data, status=HTTPStatus.OK)
+        return Response(data=data, status=HTTPStatus.OK)
 
 
 class UserLogoutView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request: request.Request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         auth.logout(request)
         data = { "detail": "Successfully logged out." }
-        return response.Response(data=data, status=HTTPStatus.OK)
+        return Response(data=data, status=HTTPStatus.OK)
 
 
 class UserManageView(generics.RetrieveUpdateDestroyAPIView):
@@ -75,9 +75,9 @@ class UserSelfView(generics.GenericAPIView):
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request: request.Request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         data = self.get_serializer(self.get_object()).data
-        return response.Response(data, status=HTTPStatus.OK)
+        return Response(data, status=HTTPStatus.OK)
 
     def get_object(self):
         return auth.get_user(self.request)
