@@ -14,6 +14,16 @@ from . import serializers
 from . import services
 
 
+class IsOwn(permissions.BasePermission):
+    def has_object_permission(self, request: Request, view, obj: models.UserDAO):
+        return obj == auth.get_user(request)
+
+
+class UserSelfMixin:
+    def get_object(self) -> models.UserDAO:
+        return auth.get_user(self.request)
+
+
 class UserListView(generics.ListAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
@@ -63,23 +73,32 @@ class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-class UserSelfView(generics.GenericAPIView):
+class UserSelfView(UserSelfMixin, generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwn|permissions.IsAdminUser]
 
     def get(self, request: Request, *args, **kwargs):
         data = self.get_serializer(self.get_object()).data
         return Response(data, status=HTTPStatus.OK)
 
-    def get_object(self):
-        return auth.get_user(self.request)
-
 
 class UserCalendarView(generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwn|permissions.IsAdminUser]
     lookup_field = 'id'
+
+    def get(self, request: Request, *args, **kwargs):
+        data = {
+            'calendar': services.get_calendar(self.get_object()),
+        }
+        return Response(data, status=HTTPStatus.OK)
+
+
+class UserSelfCalendarView(UserSelfMixin, generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request: Request, *args, **kwargs):
         data = {
