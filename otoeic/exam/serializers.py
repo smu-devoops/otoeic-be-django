@@ -25,21 +25,6 @@ class UnsubmittedQuestionSerializer(serializers.ModelSerializer):
         }
 
 
-class SubmittedQuestionSerializer(serializers.ModelSerializer):
-    word = WordForSubmittedExamSerializer(read_only=True)
-
-    class Meta:
-        model = models.ExamQuestionDAO
-        fields = [
-            'word',
-            'order',
-        ]
-        extra_kwargs = {
-            'word': {'read_only': True},
-            'order': {'read_only': True},
-        }
-
-
 class UnsubmittedExamSerializer(serializers.ModelSerializer):
     user_created = UsernameSerializer(read_only=True)
     questions = UnsubmittedQuestionSerializer(many=True, read_only=True)
@@ -72,6 +57,21 @@ class UnsubmittedExamSerializer(serializers.ModelSerializer):
             exam: models.ExamDAO = super().create(validated_data)
             services.create_questions(exam, shuffle=True)
         return exam
+
+
+class SubmittedQuestionSerializer(serializers.ModelSerializer):
+    word = WordForSubmittedExamSerializer(read_only=True)
+
+    class Meta:
+        model = models.ExamQuestionDAO
+        fields = [
+            'word',
+            'order',
+        ]
+        extra_kwargs = {
+            'word': {'read_only': True},
+            'order': {'read_only': True},
+        }
 
 
 class ExamResultSerializer(serializers.ModelSerializer):
