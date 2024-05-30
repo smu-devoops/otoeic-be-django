@@ -1,7 +1,7 @@
+from django.db.transaction import atomic
 from rest_framework import serializers
 from rest_framework.request import Request
 
-from user.models import UserDAO
 from user.serializers import UsernameSerializer
 from word.serializers import WordSerializer
 from word.serializers import WordForUnsubmittedExamSerializer
@@ -52,8 +52,9 @@ class UnsubmittedExamSerializer(serializers.ModelSerializer):
             f'Could not find user {request.user}.'
         )
         validated_data['user_created'] = request.user
-        exam: models.ExamDAO = super().create(validated_data)
-        services.create_questions(exam, shuffle=True)
+        with atomic():
+            exam: models.ExamDAO = super().create(validated_data)
+            services.create_questions(exam, shuffle=True)
         return exam
 
 

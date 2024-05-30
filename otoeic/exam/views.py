@@ -17,10 +17,14 @@ class IsCreator(permissions.BasePermission):
         )
 
 
-class UnsubmittedExamCreateView(generics.ListCreateAPIView):
-    queryset = models.ExamDAO.objects.all()
+class UnsubmittedExamListCreateView(generics.ListCreateAPIView):
     serializer_class = serializers.UnsubmittedExamSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return models.ExamDAO.objects.all()
+        return models.ExamDAO.objects.filter(user_created=self.request.user)
 
 
 class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):

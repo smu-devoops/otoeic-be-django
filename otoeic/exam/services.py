@@ -17,9 +17,10 @@ def create_questions(exam: models.ExamDAO, shuffle=True):
     words = list(WordDAO.objects.filter(level=exam.level))
     if shuffle:
         random.shuffle(words)
-    words = words[:exam.amount]
     with atomic():
-        for order, word in enumerate(words, start=1):
+        for order in range(1, exam.amount+1):
+            word = words.pop()
+            word.full_clean(exclude=['user_created'])
             question = models.ExamQuestionDAO.objects.create(
                 exam=exam,
                 word=word,
