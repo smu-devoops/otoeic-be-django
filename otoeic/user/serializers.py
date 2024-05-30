@@ -11,10 +11,12 @@ class UsernamePasswordSerializer(serializers.ModelSerializer):
             'id',
             'username',
             'password',
+            'is_staff',
         ]
         extra_kwargs = {
             'id': {'read_only': True},
             'password': {'write_only': True},
+            'is_staff': {'read_only': True},
         }
 
     def create(self, validated_data):
