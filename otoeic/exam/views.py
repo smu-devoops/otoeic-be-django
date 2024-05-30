@@ -34,6 +34,13 @@ class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
+class ExamResultRetrieveView(generics.RetrieveAPIView):
+    queryset = models.ExamDAO.objects.exclude(date_submitted=None)
+    serializer_class = serializers.ExamResultSerializer
+    permission_classes = [IsCreator|permissions.IsAdminUser]
+    lookup_field = 'id'
+
+
 class ExamRestAPI(generics.RetrieveUpdateAPIView):
     queryset = models.ExamDAO.objects.all()
     serializer_class = serializers.ExamSerializer
