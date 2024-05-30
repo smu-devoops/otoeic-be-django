@@ -82,5 +82,7 @@ class UserCalendarView(generics.GenericAPIView):
     lookup_field = 'id'
 
     def get(self, request: Request, *args, **kwargs):
-        data = services.get_calendar(user=self.get_object())
+        data = {
+            'calendar': services.get_calendar(self.get_object()),
+        }
         return Response(data, status=HTTPStatus.OK)

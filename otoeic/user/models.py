@@ -17,10 +17,12 @@ class UserDAO(AbstractUser):
     username = models.CharField(max_length=200, unique=True, blank=False)
     password = models.CharField(max_length=200, blank=False)
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
+    point = models.IntegerField(default=0)
     streak = models.IntegerField(default=0)
     streak_freeze_amount = models.IntegerField(default=0)
     streak_freeze_activated = models.BooleanField(default=False)
-    point = models.IntegerField(default=0)
+    date_streak_should_be_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now=True)
 
     # Django AbstractUser에서 사용하지 않을 기본 필드들 값 설정
     first_name = None

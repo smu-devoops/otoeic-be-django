@@ -6,11 +6,13 @@ from django.db.transaction import atomic
 from rest_framework import exceptions
 
 from user.models import UserDAO
+from user.services import update_streak
 from word.models import WordDAO
 from . import models
 from . import serializers
 
 
+DAILY_START_OFFSET = datetime.timedelta(hours=6)
 DAILY_BONUS_POINT_MULTIPLIER = 3
 
 
@@ -51,6 +53,8 @@ def create_questions(exam: models.ExamDAO, shuffle=True) -> models.ExamDAO:
 
 
 def create_result(exam: models.ExamDAO, answers: typing.List[str]) -> models.ExamDAO:
+    user: UserDAO = exam.user_created
+
     if exam.date_submitted is not None:
         raise exceptions.ValidationError(detail=(
             f'{exam} is already submitted.'
@@ -75,21 +79,25 @@ def create_result(exam: models.ExamDAO, answers: typing.List[str]) -> models.Exa
             question.save()
 
         # 시험 성적에 맞게 포인트 업데이트
-        earned_point = exam.questions.filter(is_correct=True).count()
-        if should_get_bonus(exam):
-            earned_point *= DAILY_BONUS_POINT_MULTIPLIER
-        earned_point -= exam.point
-        exam.point += earned_point
-        exam.user_created.point += earned_point
-        exam.user_created.full_clean(exclude=['email'])
-        exam.user_created.save()
+        exam.point = exam.questions.filter(is_correct=True).count()
+
+        if user.date_streak_should_be_updated < datetime.date.today():
+            exam.point *= DAILY_BONUS_POINT_MULTIPLIER
+            update_streak(user)
+
+        user.point += exam.point
+        user.full_clean(exclude=['email'])
+        user.save()
 
         # TODO: 사용자 수준 점검 관련 기능 추가 (ranked 이면 어떻게 할지...)
 
         exam.full_clean()
         exam.save()
+
     return exam
 
 
-def should_get_bonus(exam: models.ExamDAO) -> bool:
-    return True
+def clear_all():
+    for exam in models.ExamDAO.objects.all():
+        exam.user_created.point -= exam.point
+        exam.delete()
