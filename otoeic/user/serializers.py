@@ -1,11 +1,34 @@
+from rest_framework import exceptions
 from rest_framework import serializers
 
 from . import models
 
 
-class UsernamePasswordSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+class UsernamePasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserDAO
+        fields = [
+            'id',
+            'username',
+            'password',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        username = validated_data.get('username')
+        password = validated_data.get('password')
+
+        if models.UserDAO.objects.filter(username=username).exists():
+            exceptions.ValidationError(detail=(
+                f"User with username {username} already exists."
+            ))
+
+        user: models.UserDAO = super().create(validated_data)
+        user.set_password(password)
+        return user
 
 
 class UsernameSerializer(serializers.ModelSerializer):
