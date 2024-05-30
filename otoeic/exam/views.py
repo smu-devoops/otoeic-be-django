@@ -22,13 +22,14 @@ class UnsubmittedExamListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return models.ExamDAO.objects.all()
-        return models.ExamDAO.objects.filter(user_created=self.request.user)
+        queryset = models.ExamDAO.objects.filter(date_submitted=None)
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user_created=self.request.user)
+        return queryset
 
 
 class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
-    queryset = models.ExamDAO.objects.all()
+    queryset = models.ExamDAO.objects.filter(date_submitted=None)
     serializer_class = serializers.UnsubmittedExamSerializer
     permission_classes = [IsCreator|permissions.IsAdminUser]
     lookup_field = 'id'
