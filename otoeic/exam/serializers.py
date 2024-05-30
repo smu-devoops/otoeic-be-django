@@ -10,6 +10,41 @@ from . import models
 from . import services
 
 
+class ExamSerializer(serializers.ModelSerializer):
+    user_created = UsernameSerializer(read_only=True)
+
+    class Meta:
+        model = models.ExamDAO
+        fields = [
+            'id',
+            'level',
+            'amount',
+            'point',
+            'ranked',
+            'user_created',
+            'date_created',
+            'date_submitted',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'point': {'read_only': True},
+            'user_created': {'read_only': True},
+            'date_created': {'read_only': True},
+            'date_submitted': {'read_only': True},
+        }
+
+    def create(self, validated_data):
+        request: Request = self.context.get('request')
+        assert request.user.is_authenticated, (
+            f'Could not find user {request.user}.'
+        )
+        validated_data['user_created'] = request.user
+        with atomic():
+            exam: models.ExamDAO = super().create(validated_data)
+            services.create_questions(exam, shuffle=True)
+        return exam
+
+
 class UnsubmittedQuestionSerializer(serializers.ModelSerializer):
     word = WordForUnsubmittedExamSerializer(read_only=True)
 
@@ -42,21 +77,13 @@ class UnsubmittedExamSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'id': {'read_only': True},
+            'level': {'read_only': True},
+            'amount': {'read_only': True},
+            'ranked': {'read_only': True},
             'user_created': {'read_only': True},
             'date_created': {'read_only': True},
             'questions': {'read_only': True},
         }
-
-    def create(self, validated_data):
-        request: Request = self.context.get('request')
-        assert request.user.is_authenticated, (
-            f'Could not find user {request.user}.'
-        )
-        validated_data['user_created'] = request.user
-        with atomic():
-            exam: models.ExamDAO = super().create(validated_data)
-            services.create_questions(exam, shuffle=True)
-        return exam
 
 
 class SubmittedQuestionSerializer(serializers.ModelSerializer):
@@ -74,7 +101,7 @@ class SubmittedQuestionSerializer(serializers.ModelSerializer):
         }
 
 
-class ExamResultSerializer(serializers.ModelSerializer):
+class SubmittedExamSerializer(serializers.ModelSerializer):
     user_created = UsernameSerializer(read_only=True)
     questions = SubmittedQuestionSerializer(many=True, read_only=True)
 
@@ -118,27 +145,3 @@ class ExamSubmitSerializer(serializers.Serializer):
         fields = [
             'answers'
         ]
-
-
-class ExamSerializer(serializers.ModelSerializer):
-    questions = ExamQuestionSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.ExamDAO
-        fields = [
-            'id',
-            'user',
-            'level',
-            'amount',
-            'point',
-            'date_created',
-            'date_submitted',
-            'questions',
-        ]
-        extra_kwargs = {
-            'id': {'read_only': True},
-            'point': {'read_only': True},
-            'date_created': {'read_only': True},
-            'date_submitted': {'read_only': True},
-            'questions': {'read_only': True},
-        }

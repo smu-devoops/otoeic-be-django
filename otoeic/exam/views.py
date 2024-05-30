@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -17,8 +18,8 @@ class IsCreator(permissions.BasePermission):
         )
 
 
-class UnsubmittedExamListCreateView(generics.ListCreateAPIView):
-    serializer_class = serializers.UnsubmittedExamSerializer
+class ExamListCreateView(generics.ListCreateAPIView):
+    serializer_class = serializers.ExamSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -26,6 +27,15 @@ class UnsubmittedExamListCreateView(generics.ListCreateAPIView):
         if not self.request.user.is_staff:
             queryset = queryset.filter(user_created=self.request.user)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        # 새로 생성된 시험은 문제 목록도 보여줘야 하므로 Serializer를 변경
+        serializer = serializers.UnsubmittedExamSerializer(instance=instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
@@ -35,9 +45,9 @@ class UnsubmittedExamRetrieveView(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
-class ExamResultRetrieveView(generics.RetrieveAPIView):
+class SubmittedExamRetrieveView(generics.RetrieveAPIView):
     queryset = models.ExamDAO.objects.exclude(date_submitted=None)
-    serializer_class = serializers.ExamResultSerializer
+    serializer_class = serializers.SubmittedExamSerializer
     permission_classes = [IsCreator|permissions.IsAdminUser]
     lookup_field = 'id'
 
