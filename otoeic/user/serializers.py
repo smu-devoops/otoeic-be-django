@@ -4,6 +4,25 @@ from rest_framework import serializers
 from . import models
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserDAO
+        fields = [
+            'id',
+            'username',
+            'level',
+            'streak',
+            'streak_freeze_amount',
+            'streak_freeze_activated',
+            'point',
+            'is_staff',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'is_staff': {'read_only': True},
+        }
+
+
 class UsernamePasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserDAO
@@ -43,22 +62,4 @@ class UsernameSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
             'username': {'read_only': True},
-        }
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.UserDAO
-        fields = [
-            'id',
-            'username',
-            'level',
-            'streak_freeze_amount',
-            'is_streak_freeze_activated',
-            'point',
-            'is_staff',
-        ]
-        extra_kwargs = {
-            'id': {'read_only': True},
-            'is_staff': {'read_only': True},
         }

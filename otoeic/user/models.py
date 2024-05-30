@@ -19,7 +19,7 @@ class UserDAO(AbstractUser):
     level = models.IntegerField(choices=Level.choices, default=Level.LEVEL_1)
     streak = models.IntegerField(default=0)
     streak_freeze_amount = models.IntegerField(default=0)
-    is_streak_freeze_activated = models.BooleanField(default=False)
+    streak_freeze_activated = models.BooleanField(default=False)
     point = models.IntegerField(default=0)
 
     # Django AbstractUser에서 사용하지 않을 기본 필드들 값 설정
