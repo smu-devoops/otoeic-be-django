@@ -18,8 +18,8 @@ class WordType(models.TextChoices):
 
 class WordDAO(models.Model):
     id = models.BigAutoField(primary_key=True, auto_created=True)
-    english = models.TextField(unique=True, null=False, blank=False)
-    korean = models.TextField(null=False, blank=False)
+    english = models.CharField(max_length=200, blank=False)
+    korean = models.CharField(max_length=200, blank=False)
     type = models.CharField(max_length=5, choices=WordType.choices)
     level = models.IntegerField(choices=Level.choices)
     date_modified = models.DateTimeField(auto_now=True)

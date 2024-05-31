@@ -11,14 +11,15 @@ from . import models
 from . import serializers
 
 
-class ReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+class IsWordReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request: Request, view, obj: models.WordDAO):
+        return bool(
+            request.method in permissions.SAFE_METHODS and
+            obj.user_created is None
+        )
 
 
 class IsWordOwner(permissions.BasePermission):
-    message = 'Not an owner of this word.'
-
     def has_object_permission(self, request: Request, view, obj: models.WordDAO):
         return bool(
             request.user and
@@ -34,7 +35,11 @@ class WordListCreateView(generics.ListCreateAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        return models.WordDAO.objects.filter(Q(user_created=self.request.user) | Q(user_created=None))
+        queryset = models.WordDAO.objects.all()
+        if not self.request.user.is_staff:
+            # 사용자는 자신이 생성했거나, 공용인 단어만 조회할 수 있다.
+            queryset = queryset.filter(Q(user_created=self.request.user) | Q(user_created=None))
+        return queryset
 
     def perform_create(self, serializer):
         word: models.WordDAO
@@ -49,5 +54,5 @@ class WordListCreateView(generics.ListCreateAPIView):
 class WordManipulateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.WordDAO.objects.all()
     serializer_class = serializers.WordSerializer
-    permission_classes = [ReadOnly|IsWordOwner]
+    permission_classes = [IsWordReadOnly|IsWordOwner|permissions.IsAdminUser]
     lookup_field = 'id'

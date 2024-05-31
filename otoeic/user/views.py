@@ -1,15 +1,27 @@
 from http import HTTPStatus
 
 from django.contrib import auth
+from rest_framework import exceptions
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework import permissions
-from rest_framework import request
-from rest_framework import response
 from rest_framework import views
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from . import models
 from . import serializers
+from . import services
+
+
+class IsOwn(permissions.BasePermission):
+    def has_object_permission(self, request: Request, view, obj: models.UserDAO):
+        return obj == auth.get_user(request)
+
+
+class UserSelfMixin:
+    def get_object(self) -> models.UserDAO:
+        return auth.get_user(self.request)
 
 
 class UserListView(generics.ListAPIView):
@@ -20,55 +32,38 @@ class UserListView(generics.ListAPIView):
     search_fields = ['username']
 
 
-class UserRegisterView(views.APIView):
+class UserRegisterView(generics.CreateAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UsernamePasswordSerializer
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request: request.Request, *args, **kwargs):
-        serializer = serializers.UsernamePasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data.get('username')
-        password = serializer.validated_data.get('password')
-
-        if models.UserDAO.objects.filter(username=username).exists():
-            data = { "detail": "User already exists" }
-            return response.Response(data=data, status=HTTPStatus.BAD_REQUEST)
-
-        user = models.UserDAO.objects.create(username=username, password=password)
-        user.set_password(password)
-        user.save()
-
-        data = serializers.UserSerializer(user).data
-        return response.Response(data=data, status=HTTPStatus.CREATED)
-
-
-class UserLoginView(views.APIView):
+class UserLoginView(generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UsernamePasswordSerializer
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request: request.Request, *args, **kwargs):
-        serializer = serializers.UsernamePasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        username = serializer.validated_data.get('username')
-        password = serializer.validated_data.get('password')
-
+    def post(self, request: Request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
         user = auth.authenticate(request, username=username, password=password)
-        if user is not None:
-            auth.login(request, user)
-            data = serializers.UserSerializer(user).data
-            return response.Response(data=data, status=HTTPStatus.OK)
-        else:
-            data = { "detail": "Not authenticated." }
-            return response.Response(data=data, status=HTTPStatus.UNAUTHORIZED)
+        if user is None:
+            auth.logout(request)
+            raise exceptions.AuthenticationFailed(detail=(
+                f"User authentication failed."
+            ))
+        auth.login(request, user)
+        data = self.get_serializer(instance=user).data
+        return Response(data=data, status=HTTPStatus.OK)
 
 
 class UserLogoutView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request: request.Request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         auth.logout(request)
         data = { "detail": "Successfully logged out." }
-        return response.Response(data=data, status=HTTPStatus.OK)
+        return Response(data=data, status=HTTPStatus.OK)
 
 
 class UserManageView(generics.RetrieveUpdateDestroyAPIView):
@@ -78,14 +73,42 @@ class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-class UserSelfView(generics.GenericAPIView):
+class UserSelfManageView(UserSelfMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [IsOwn|permissions.IsAdminUser]
+
+
+class UserCalendarView(generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    permission_classes = [IsOwn|permissions.IsAdminUser]
+    lookup_field = 'id'
+
+    def get(self, request: Request, *args, **kwargs):
+        data = {
+            'calendar': services.get_calendar(self.get_object()),
+        }
+        return Response(data, status=HTTPStatus.OK)
+
+
+class UserSelfCalendarView(UserSelfMixin, generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request: request.Request, *args, **kwargs):
-        data = self.get_serializer(self.get_object()).data
-        return response.Response(data, status=HTTPStatus.OK)
+    def get(self, request: Request, *args, **kwargs):
+        data = {
+            'calendar': services.get_calendar(self.get_object()),
+        }
+        return Response(data, status=HTTPStatus.OK)
 
-    def get_object(self):
-        return auth.get_user(self.request)
+
+class UserBuyFreezeView(UserSelfMixin, generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request: Request, *args, **kwargs):
+        services.buy_streak_freeze(self.get_object())
+        data = serializers.UserSerializer(instance=self.get_object()).data
+        return Response(data, status=HTTPStatus.OK)
