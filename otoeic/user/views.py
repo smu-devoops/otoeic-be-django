@@ -15,6 +15,9 @@ from . import services
 
 
 class IsOwn(permissions.BasePermission):
+    def has_permission(self, request: Request, view):
+        return auth.get_user(request).is_authenticated
+
     def has_object_permission(self, request: Request, view, obj: models.UserDAO):
         return obj == auth.get_user(request)
 
@@ -69,7 +72,7 @@ class UserLogoutView(views.APIView):
 class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsOwn|permissions.IsAdminUser]
     lookup_field = 'id'
 
 
