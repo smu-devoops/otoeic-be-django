@@ -14,6 +14,9 @@ from . import serializers
 from . import services
 
 
+permissions.IsAuthenticated.has_permission = lambda self, request, view: auth.get_user(request).id is not None
+
+
 class IsOwn(permissions.BasePermission):
     def has_permission(self, request: Request, view):
         return auth.get_user(request).is_authenticated
