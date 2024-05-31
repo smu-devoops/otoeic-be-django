@@ -14,7 +14,7 @@ from . import serializers
 from . import services
 
 
-permissions.IsAuthenticated.has_permission = lambda self, request, view: auth.get_user(request).id is not None
+# permissions.IsAuthenticated.has_permission = lambda self, request, view: auth.get_user(request).id is not None
 
 
 class IsOwn(permissions.BasePermission):
@@ -109,10 +109,22 @@ class UserSelfCalendarView(UserSelfMixin, generics.GenericAPIView):
         return Response(data, status=HTTPStatus.OK)
 
 
-class UserBuyFreezeView(UserSelfMixin, generics.GenericAPIView):
+class UserBuyFreezeView(generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwn|permissions.IsAdminUser]
+    lookup_field = 'id'
+
+    def post(self, request: Request, *args, **kwargs):
+        services.buy_streak_freeze(self.get_object())
+        data = serializers.UserSerializer(instance=self.get_object()).data
+        return Response(data, status=HTTPStatus.OK)
+
+
+class UserSelfBuyFreezeView(UserSelfMixin, generics.GenericAPIView):
+    queryset = models.UserDAO.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwn|permissions.IsAdminUser]
 
     def post(self, request: Request, *args, **kwargs):
         services.buy_streak_freeze(self.get_object())
