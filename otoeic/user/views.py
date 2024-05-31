@@ -43,6 +43,11 @@ class UserRegisterView(generics.CreateAPIView):
     serializer_class = serializers.UsernamePasswordSerializer
     permission_classes = [permissions.AllowAny]
 
+    def perform_create(self, serializer):
+        user: models.UserDAO = serializer.save()
+        user.set_password(serializer.validated_data.get('password'))
+        user.save()
+
 
 class UserLoginView(generics.GenericAPIView):
     queryset = models.UserDAO.objects.all()
