@@ -9,9 +9,6 @@ from user.models import UserDAO
 from word.models import WordDAO
 
 
-DAILY_BONUS_POINT_MULTIPLIER = 3
-
-
 class ExamDAO(models.Model):
     id = models.BigAutoField(primary_key=True, auto_created=True)
     level = models.IntegerField(choices=Level.choices)
